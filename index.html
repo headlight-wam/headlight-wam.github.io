@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HeadLight: Targeted Adaptation of World-Action Models via Interaction and Motion Heads</title>
+  <meta name="description" content="HeadLight finds Next-Interaction Heads and Motion Heads inside pretrained World-Action Models and fine-tunes only those heads, beating full fine-tuning and LoRA on unseen manipulation tasks while updating 1.1% of parameters.">
+
+  <!-- Social previews -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HeadLight: Targeted Adaptation of World-Action Models via Interaction and Motion Heads">
+  <meta property="og:description" content="Fine-tune only the attention heads that know where to interact next and how the scene moves.">
+  <meta property="og:image" content="static/images/figures/teaser.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131830'/%3E%3Cpath d='M26 22 L60 8 L60 56 L26 42 Z' fill='%23f5c242' opacity='.55'/%3E%3Ccircle cx='22' cy='32' r='12' fill='%23f5c242'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<header class="hero" id="top">
+  <div class="beam" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="eyebrow">World-Action Models · Robot Manipulation · Interpretability</p>
+    <h1 class="wordmark"><span class="lamp" aria-hidden="true"></span>HeadLight</h1>
+    <p class="subtitle">Targeted Adaptation of World-Action Models via Interaction and Motion Heads</p>
+
+    <!-- Add personal-page links to the authors by wrapping names in <a href="..."> -->
+    <ul class="authors">
+      <li>Yuze Zhu<sup>1</sup></li>
+      <li>Jacky Li<sup>2</sup></li>
+      <li>Yusen Luo<sup>3</sup></li>
+      <li>Ken Jiankun Zheng<sup>1</sup></li>
+      <li>Chancharik Mitra<sup>4</sup></li>
+      <li>Trevor Darrell<sup>1</sup></li>
+      <li>Roei Herzig<sup>1</sup></li>
+    </ul>
+    <ul class="affiliations">
+      <li><sup>1</sup>University of California, Berkeley</li>
+      <li><sup>2</sup>University of Toronto</li>
+      <li><sup>3</sup>University of Southern California</li>
+      <li><sup>4</sup>Massachusetts Institute of Technology</li>
+    </ul>
+
+    <div class="buttons">
+      <a class="btn" href="HeadLight_arxiv.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2v6h6M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        Paper
+      </a>
+      <!-- TODO: replace with the arXiv abstract URL once available -->
+      <a class="btn is-pending" href="#" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 L12 4 L20 20 M7.5 13h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        arXiv <span class="soon">soon</span>
+      </a>
+      <!-- TODO: replace with the code repository URL once available -->
+      <a class="btn is-pending" href="#" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9V21c0 .3.2.6.7.5A10 10 0 0 0 12 2z" fill="currentColor"/></svg>
+        Code <span class="soon">soon</span>
+      </a>
+      <a class="btn" href="#bibtex">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7c-2 0-3 1.5-3 4v6h6v-6H6.5c0-2 .5-2.5 1.5-2.5M17 7c-2 0-3 1.5-3 4v6h6v-6h-3.5c0-2 .5-2.5 1.5-2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        BibTeX
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== NAV ============================== -->
+<nav class="topnav" aria-label="Sections">
+  <div class="topnav-inner">
+    <a href="#top" class="nav-brand"><span class="lamp small" aria-hidden="true"></span>HeadLight</a>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#heads">Two Head Families</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#real">Real Robot</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================== TL;DR ============================== -->
+<section class="section" id="overview">
+  <div class="container">
+    <p class="tldr"><strong>TL;DR</strong> Pretrained World-Action Models already contain a few attention heads that track <em class="c-nih">where to interact next</em> and others that track <em class="c-mot">how the robot and objects move</em>. HeadLight finds them and fine-tunes <em>only those heads</em>. It beats full fine-tuning and LoRA on unseen tasks while updating 1.1% of the parameters.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">62.3<span>%</span></div>
+        <div class="stat-label">success on unseen RoboTwin tasks (Zero-WAM)</div>
+        <div class="stat-delta">+4.4 pts over full FT · +3.6 over LoRA</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1.1<span>%</span></div>
+        <div class="stat-label">of parameters updated</div>
+        <div class="stat-delta">113M of 10B · no inference overhead</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">57.9<span class="arrow">→</span>0.9<span>%</span></div>
+        <div class="stat-label">success after removing the 48 Motion Heads</div>
+        <div class="stat-delta">48 random heads: 47.4%</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">72.5<span>%</span></div>
+        <div class="stat-label">real-robot success on unseen tasks (LingBot-VA)</div>
+        <div class="stat-delta">+11.25 pts over LoRA</div>
+      </div>
+    </div>
+
+    <figure class="figure">
+      <img src="static/images/figures/teaser.png" alt="Figure 1: Manipulation needs to know where to interact next and how the robot and objects move. HeadLight finds Next-Interaction Heads and Motion Heads inside a World Action Model." loading="eager">
+      <figcaption><b>HeadLight looks inside a World-Action Model.</b> (a) Successful manipulation requires both localizing where to interact next and modeling how the robot and objects move. If either is missing, the task fails. (b) Inside pretrained WAMs we find <span class="c-nih">Next-Interaction Heads</span>, which localize upcoming grasp and release targets, and <span class="c-mot">Motion Heads</span>, whose cross-frame attention aligns with optical flow. HeadLight fine-tunes only these heads.</figcaption>
+    </figure>
+
+    <h2 class="section-title">Abstract</h2>
+    <div class="abstract">
+      <p>World-Action Models (WAMs) are a promising new paradigm of robot manipulation policies that jointly generate future video and actions. Successful manipulation requires both identifying where to interact and modeling how the robot and objects move. Yet standard adaptation methods, such as full fine-tuning and LoRA, do not explicitly select parameters aligned with these manipulation-specific capabilities. Motivated by this challenge, we discover two functionally specialized families of attention heads: <b class="c-nih">Next-Interaction Heads</b>, which localize upcoming grasp-and-release targets, and <b class="c-mot">Motion Heads</b>, which track movement across frames. Furthermore, we introduce <b>HeadLight</b>, a parameter-efficient refinement method that jointly adapts Next-Interaction Heads and Motion Heads.</p>
+      <p>On RoboTwin tasks unseen during fine-tuning, HeadLight achieves 62.28% success, compared with 57.89% for full fine-tuning and 58.66% for LoRA, while updating only 1.1% of parameters. Inference-time ablations further validate the functional importance of these heads: ablating Motion Heads reduces manipulation success from 57.89% to 0.94%, while ablating Next-Interaction Heads lowers it to 40.61%, both substantially more than ablating equally many random heads. Finally, we show that our approach is effective across multiple WAM architectures and real-robot manipulation settings.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== HEAD FAMILIES ============================== -->
+<section class="section alt" id="heads">
+  <div class="container">
+    <h2 class="section-title">Two families of specialized heads</h2>
+    <p class="lead">Manipulation alternates between discrete contact events (grasp, release) and continuous motion. We score every one of the 720 video attention heads in a frozen WAM on both axes. A small, disjoint set of heads stands out on each.</p>
+
+    <div class="family-grid">
+      <article class="family nih">
+        <header>
+          <span class="tag">24 heads</span>
+          <h3>Next-Interaction Heads</h3>
+          <p class="family-sub">Where to interact next</p>
+        </header>
+        <img src="static/images/figures/nih_attention.png" alt="Attention map of Next-Interaction Head L10h23 focusing on the upcoming grasp target, next to an unselected head with diffuse attention." loading="lazy">
+        <p>To find them, we mask the token covering the <em>upcoming</em> interaction target and measure how much each head's output changes. We compare that change against four control tokens: a random token, one equidistant from the gripper, the previous target, and the target after next. A head counts only if the true next target matters more than every control.</p>
+        <div class="eq">$$S_N(\ell,h)=\min_{c}\,\log\frac{\mathbb{E}_f\!\left[\Delta_{\ell,h}(\mathcal{T})\right]}{\mathbb{E}_f\!\left[\Delta_{\ell,h}(\mathcal{C}_c)\right]}$$</div>
+        <p class="note">The selected head locks onto the grasp target and ignores the distractor. A same-layer unselected head attends diffusely.</p>
+      </article>
+
+      <article class="family mot">
+        <header>
+          <span class="tag">48 heads</span>
+          <h3>Motion Heads</h3>
+          <p class="family-sub">How the robot and objects move</p>
+        </header>
+        <img src="static/images/figures/motion_flow.png" alt="Optical flow compared with the attention-induced motion field of Motion Head L7h0, which matches it, and random head L7h20, which does not." loading="lazy">
+        <p>Each head's cross-frame attention defines a motion field: every patch points to where it attends in the previous frame. We score heads by how well that field agrees with optical flow, using cosine similarity.</p>
+        <div class="eq">$$S_M(\ell,h)=\mathbb{E}_{f,p}\!\left[\cos\!\big(\hat{\mathbf{u}}^{f}_{\ell,h}(p),\,\mathbf{u}^{f}(p)\big)\right]$$</div>
+        <p class="note">Motion Head L7h0 tracks the moving arm and gripper. Random head L7h20 gives disorganized offsets.</p>
+      </article>
+    </div>
+
+    <div class="tabs" data-tabs>
+      <div class="tab-list" role="tablist" aria-label="More head visualizations">
+        <button role="tab" aria-selected="true" aria-controls="tab-nih-ep" id="t-nih-ep">Next-Interaction Heads over an episode</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-mot-tasks" id="t-mot-tasks" tabindex="-1">Motion Heads on more tasks</button>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-nih-ep" aria-labelledby="t-nih-ep">
+        <figure class="figure flat">
+          <img src="static/images/figures/nih_episode.png" alt="Attention maps of a Next-Interaction Head across consecutive frames in Zero-WAM and LingBot-VA, moving from grasp target to release target." loading="lazy">
+          <figcaption>The white square marks the upcoming interaction target. In Zero-WAM (L10h23), attention sits on the object to be grasped. Once the object is grasped, it shifts to the release location. LingBot-VA (L11h10) shows the same behavior.</figcaption>
+        </figure>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-mot-tasks" aria-labelledby="t-mot-tasks" hidden>
+        <figure class="figure flat">
+          <img src="static/images/figures/motion_tasks.png" alt="Optical flow, Motion Head L7h0 and random head L7h20 motion fields on four tasks across Zero-WAM and LingBot-VA." loading="lazy">
+          <figcaption>L7h0 is a selected Motion Head in both models; L7h20 is not selected in either. The Motion Head follows the moving arm and manipulated objects in every example.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== METHOD ============================== -->
+<section class="section" id="method">
+  <div class="container">
+    <h2 class="section-title">Method</h2>
+    <p class="lead">HeadLight is a one-time head discovery step, a causal check, and a targeted fine-tune. Both pathways use a single forward pass. Updates are additive, so they merge into the base weights and inference cost stays the same.</p>
+
+    <figure class="figure">
+      <img src="static/images/figures/overview.png" alt="Overview of HeadLight: find the two head groups, verify model failures under ablation, and fine-tune only those heads." loading="lazy">
+    </figure>
+
+    <ol class="steps">
+      <li>
+        <span class="step-n">1</span>
+        <h3>Find the two head groups</h3>
+        <p>We run one teacher-forced pass of the frozen WAM over a few demonstrations per task and score all 720 video heads. The top <b class="c-nih">K<sub>N</sub>=24</b> by S<sub>N</sub> and the top <b class="c-mot">K<sub>M</sub>=48</b> by S<sub>M</sub> are kept. No gradients are needed, and the sets are reused across downstream tasks.</p>
+      </li>
+      <li>
+        <span class="step-n">2</span>
+        <h3>Verify they matter</h3>
+        <p>Removing each group at inference causes a distinct failure. Without Next-Interaction Heads, the robot <em>misses the cup</em>. Without Motion Heads, the predicted video shows <em>ghosted, inflated objects</em> and execution stalls. Removing the same number of random heads leaves the rollout largely intact.</p>
+      </li>
+      <li>
+        <span class="step-n">3</span>
+        <h3>Fine-tune only those heads</h3>
+        <p><b class="c-nih">Video pathway:</b> the video loss updates only the 24 Next-Interaction Heads, which sharpens where grasps and releases appear in the predicted video. <b class="c-mot">Action pathway:</b> the video Motion Heads stay frozen. The action loss updates their 48 paired action heads, so actions follow the predicted motion.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================== RESULTS ============================== -->
+<section class="section alt" id="results">
+  <div class="container">
+    <h2 class="section-title">Generalization to unseen tasks</h2>
+    <p class="lead">Every method is adapted on 43 seen RoboTwin 2.0 tasks and evaluated on 6 unseen tasks (100 trials × 3 seeds each). LoRA's rank is chosen to match HeadLight's parameter budget (113.5M vs. 113.3M).</p>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Average success on unseen tasks</h3>
+        <div class="seg" role="group" aria-label="Backbone" data-backbone-toggle>
+          <button aria-pressed="true" data-backbone="zero">Zero-WAM</button>
+          <button aria-pressed="false" data-backbone="lingbot">LingBot-VA</button>
+        </div>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw sw-base"></i>Unadapted</span>
+        <span><i class="sw sw-ft"></i>Full FT</span>
+        <span><i class="sw sw-lora"></i>LoRA</span>
+        <span><i class="sw sw-hl"></i>HeadLight</span>
+      </div>
+      <div class="hbars" id="avg-chart"></div>
+
+      <details class="table-toggle" open>
+        <summary>Per-task success rate (%, mean ± std over 3 seeds)</summary>
+        <div class="table-wrap">
+          <table class="data" id="task-table"></table>
+        </div>
+      </details>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Removing heads at inference</h3>
+        <p class="card-sub">Zero-WAM after full FT, unseen tasks. Lower success means the heads matter more.</p>
+        <div class="hbars compact" id="ablation-chart"></div>
+        <p class="card-foot">The two sets are disjoint among all 720 video heads. Removing the 48 Motion Heads drops success to near zero.</p>
+      </div>
+      <div class="card">
+        <h3>The two pathways are complementary</h3>
+        <p class="card-sub">Zero-WAM, unseen tasks. Each pathway is compared with an equally sized random-head control.</p>
+        <div class="hbars compact" id="pathway-chart"></div>
+        <p class="card-foot">Each pathway alone beats its random-head control. Combining them adds more than 6 points over either pathway alone.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title">Same scene, different outcome</h3>
+    <div class="tabs" data-tabs>
+      <div class="tab-list" role="tablist" aria-label="Simulation rollouts">
+        <button role="tab" aria-selected="true" aria-controls="tab-sim-obj" id="t-sim-obj">Place object on scale</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-sim-bread" id="t-sim-bread" tabindex="-1">Place bread in basket</button>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-sim-obj" aria-labelledby="t-sim-obj">
+        <figure class="figure flat"><img src="static/images/figures/sim_place_object.png" alt="Full FT closes on the object but fails to lift it; HeadLight grasps and places it on the scale." loading="lazy"></figure>
+      </div>
+      <div class="tab-panel" role="tabpanel" id="tab-sim-bread" aria-labelledby="t-sim-bread" hidden>
+        <figure class="figure flat"><img src="static/images/figures/sim_place_bread.png" alt="Full FT fails to lift the bread; HeadLight places it in the basket." loading="lazy"></figure>
+      </div>
+      <p class="caption-out">Executed head-camera frames at matching action steps on identical unseen scenes (Zero-WAM). Full FT closes its gripper on or beside the object but fails to lift it. HeadLight grasps, carries, and places the object.</p>
+    </div>
+
+    <h3 class="sub-title">The heads exist in other WAMs too</h3>
+    <p class="lead small">We rediscover both head families on four more public WAM checkpoints, without fine-tuning, and remove them at inference. Each removal is compared with removing the same number of random video heads.</p>
+    <div class="table-wrap">
+      <table class="data compact">
+        <thead>
+          <tr><th rowspan="2">Model</th><th rowspan="2">Benchmark</th><th rowspan="2">Original</th><th colspan="2" class="grp c-nih-bg">Next-Interaction</th><th colspan="2" class="grp c-mot-bg">Motion</th></tr>
+          <tr><th>random</th><th>selected</th><th>random</th><th>selected</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Fast-WAM</td><td>RoboTwin 2.0</td><td>91.9</td><td>90.0</td><td><b>85.6</b></td><td>91.8</td><td><b>90.5</b></td></tr>
+          <tr><td>Motus</td><td>RoboTwin 2.0</td><td>88.7</td><td>85.9</td><td><b>85.5</b></td><td>85.0</td><td><b>75.8</b></td></tr>
+          <tr><td>OpenWAM-π</td><td>LIBERO</td><td>99.3</td><td>98.6</td><td><b>91.9</b></td><td>99.4</td><td><b>98.5</b></td></tr>
+          <tr><td>Cosmos3-Edge</td><td>LIBERO</td><td>98.0</td><td>81.9</td><td><b>51.7</b></td><td>96.6</td><td><b>37.5</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="card-foot">Values are success rates (%). The size of each drop depends on how the model routes video information to actions. For example, Motion Heads matter most when actions depend on predicted future frames.</p>
+  </div>
+</section>
+
+<!-- ============================== REAL ROBOT ============================== -->
+<section class="section" id="real">
+  <div class="container">
+    <h2 class="section-title">Real-robot manipulation</h2>
+    <p class="lead">This uses a Franka Panda with a third-person ZED 2i and a wrist-mounted ZED Mini. Policies are adapted on four seen tasks (100 teleoperated demos each). They are tested on those four tasks and on four unseen tasks that recombine the same objects into new goals. Each task gets 20 rollouts.</p>
+
+    <figure class="figure">
+      <img src="static/images/figures/real_setup.png" alt="Real-robot workspace with a Franka Panda, and the four seen and four unseen tasks." loading="lazy">
+    </figure>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Average success rate</h3>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw sw-ft"></i>Full FT</span>
+        <span><i class="sw sw-lora"></i>LoRA</span>
+        <span><i class="sw sw-hl"></i>HeadLight</span>
+      </div>
+      <div class="vbar-panels" id="real-chart"></div>
+    </div>
+
+    <h3 class="sub-title">Rollout browser</h3>
+    <div class="browser" id="rollout-browser">
+      <div class="task-picker">
+        <div class="task-group">
+          <span class="group-label">Seen</span>
+          <div class="chips" data-split="seen"></div>
+        </div>
+        <div class="task-group">
+          <span class="group-label">Unseen</span>
+          <div class="chips" data-split="unseen"></div>
+        </div>
+      </div>
+      <div class="browser-body">
+        <p class="instruction" id="rb-instruction"></p>
+        <div class="frames" id="rb-frames"></div>
+        <div class="frame-axis" aria-hidden="true"><span>start</span><span>time →</span><span>end</span></div>
+        <div class="counts" id="rb-counts"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BIBTEX ============================== -->
+<section class="section alt" id="bibtex">
+  <div class="container">
+    <h2 class="section-title">BibTeX</h2>
+    <div class="bib">
+      <button class="copy" type="button" data-copy="#bib-code">Copy</button>
+<pre><code id="bib-code">@article{zhu2026headlight,
+  title   = {Targeted Adaptation of World-Action Models via Interaction and Motion Heads},
+  author  = {Zhu, Yuze and Li, Jacky and Luo, Yusen and Zheng, Ken Jiankun and
+             Mitra, Chancharik and Darrell, Trevor and Herzig, Roei},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>HeadLight · UC Berkeley · University of Toronto · USC · MIT</p>
+    <p class="muted">Page layout inspired by academic project pages such as <a href="https://bridgevla-plus.github.io/" target="_blank" rel="noopener">BridgeVLA++</a>.</p>
+  </div>
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="static/js/main.js"></script>
+</body>
+</html>
