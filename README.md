@@ -31,6 +31,5 @@ static/images/rollouts/  real-robot keyframes (Fig. 15), one folder per task
 
 ### To update
 
-- **arXiv / Code links:** search `index.html` for `TODO`. Replace `href="#"` with the URL and remove the `is-pending` class and the `<span class="soon">` badge.
+- **Code link:** search `index.html` for `TODO`. Replace `href="#"` with the URL and remove the `is-pending` class and the `<span class="soon">` badge.
 - **Author homepages:** wrap each name in the `.authors` list with `<a href="...">`.
-- **BibTeX:** update the `@article` entry once the arXiv ID is known.
